@@ -1,11 +1,13 @@
 package main
 
 import (
+	"blog/config"
 	"blog/router"
 
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	router.Init()
+	db := config.GetDB()
+	router.Init(db)
 }

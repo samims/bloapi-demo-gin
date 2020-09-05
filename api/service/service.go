@@ -2,12 +2,14 @@ package service
 
 import (
 	"blog/api"
-	"blog/db/models"
+	"blog/repository"
+
+	"github.com/astaxie/beego/orm"
 )
 
 // Services in the interface for service
 type Services interface {
-	Article() api.Article
+	Article() api.Article // This is article service interface
 }
 type services struct {
 	article api.Article
@@ -18,17 +20,20 @@ func (svc *services) Article() api.Article {
 }
 
 // Init initializes Service
-func Init() Services {
+func Init(db orm.Ormer) Services {
 	// instance.Init(config.NewConfig())
 	// defer instance.Destroy()
 
 	// config := in()
 	// log.Fatal(config)
-	var db = []models.Article{}
+
+	// ar := repository.NewArticleRepo(db)
+
+	// aS := api.NewArticle(ar)
 
 	return &services{
 		article: api.NewArticle(
-			db,
+			repository.NewArticleRepo(db),
 		),
 	}
 }

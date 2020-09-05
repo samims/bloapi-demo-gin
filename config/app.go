@@ -1,46 +1,53 @@
 package config
 
-type Config interface {
-	GetDBHost() string
-	GetDBPort() int64
-	GetDBName() string
-	GetDBUser() string
-	GetDBPass() string
-}
+import (
+	"fmt"
+	"os"
 
-type config struct {
-	dbHost string
-	dbPort int64
-	dbName string
-	dbUser string
-	dbPass string
-}
+	"github.com/astaxie/beego/orm"
+)
 
-func (c *config) GetDBHost() string {
-	return c.dbHost
-}
+var db orm.Ormer
 
-func (c *config) GetDBPort() int64 {
-	return c.dbPort
-}
+// GetDb : It will returns orm object
+func GetDB() orm.Ormer {
+	if db == nil {
+		dbHost := os.Getenv("POSTGRES_HOST")
+		dbName := os.Getenv("POSTGRES_DB")
+		dbUser := os.Getenv("POSTGRES_USER")
+		dbPassword := os.Getenv("POSTGRES_PASSWORD")
+		dbPort := os.Getenv("POSTGRES_PORT")
 
-func (c *config) GetDBName() string {
-	return c.dbName
-}
-func (c *config) GetDBUser() string {
-	return c.dbUser
-}
-func (c *config) GetDBPass() string {
-	return c.dbPass
-}
+		if dbHost == "" {
+			fmt.Println("Environment variable DB_HOST is null.")
+			return nil
+		}
+		if dbName == "" {
+			fmt.Println("Environment variable DB_NAME is null.")
+			return nil
+		}
+		if dbUser == "" {
+			fmt.Println("Environment variable DB_USERNAME is null.")
+			return nil
+		}
+		if dbPassword == "" {
+			fmt.Println("Environment variable DB_PASSWORD is null.")
+			return nil
+		}
 
-// NewConfig config init
-func NewConfig() Config {
-	return &config{
-		dbHost: "localhost",
-		dbPort: 5432,
-		dbName: "blog",
-		dbUser: "postgres",
-		dbPass: "",
+		if dbPort == "" {
+			dbPort = "5432"
+		}
+
+		orm.RegisterDriver("postgres", orm.DRPostgres)
+		orm.RegisterDataBase("default", "postgres", "postgres://"+dbUser+":"+dbPassword+"@"+dbHost+":"+dbPort+"/"+dbName+"?sslmode=disable")
+
+		// This is for auto generating tables
+		orm.RunSyncdb("default", false, true)
+
+		db = orm.NewOrm()
+		db.Using("default")
+
 	}
+	return db
 }

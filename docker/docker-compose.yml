@@ -1,0 +1,33 @@
+version: "3"
+services:
+  web-blog:
+    networks:
+      - blog
+    build: .
+    container_name: blog
+    security_opt:
+      - seccomp:unconfined
+    env_file: .env
+    ports:
+      - "3001:3000"
+    volumes:
+      - "../:/go/src/app"
+    depends_on:
+      - db-blog
+
+  db-blog:
+    networks:
+      - blog
+    image: postgres:12
+    container_name: postgres-blog
+    ports:
+      - "5439:5432"
+    env_file: .env
+    volumes:
+        - db-blog-data:/var/lib/postgresql/data/
+
+volumes:
+  db-blog-data:
+
+networks:
+  blog:
